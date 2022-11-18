@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Alert,
   FlatList,
@@ -13,13 +13,41 @@ import { Participant } from "../../components/Participant";
 import { styles } from "./styles";
 
 export function Home() {
-  const participants = [];
-  function handleParticipantAdd() {
-    Alert.alert("Participante", "Participante foi adicionado!");
+  const [participants, setParticipants] = useState<string[]>([]);
+  const [participantName, setParticipantName] = useState("");
+
+  function handleParticipantAdd(name: string) {
+    if (participants.includes(participantName)) {
+      return Alert.alert(
+        "Participante Existe",
+        `Já existe o(a) parcipante ${name} cadastrado(a) na lista!`
+      );
+    }
+
+    setParticipants((pervState) => [...pervState, participantName]);
+    setParticipantName("");
   }
 
-  function handleParticipantRemove() {
-    Alert.alert("Participante", "Participante foi removido!");
+  function handleParticipantRemove(name: string) {
+    Alert.alert(
+      "Remover Participante",
+      `Deseja excluir o(a) participante ${name} da lista?`,
+      [
+        {
+          text: "Sim",
+          onPress: () => {
+            setParticipants((prevState) =>
+              prevState.filter((participant) => participant !== name)
+            );
+            Alert.alert("Deletado", "Participante removido com successo!");
+          },
+        },
+        {
+          text: "Não",
+          style: "cancel",
+        },
+      ]
+    );
   }
 
   return (
@@ -32,9 +60,14 @@ export function Home() {
           style={styles.input}
           placeholder="Nome do participante"
           placeholderTextColor="#6B6B6B"
+          onChangeText={setParticipantName}
+          value={participantName}
         />
 
-        <TouchableOpacity style={styles.button} onPress={handleParticipantAdd}>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => handleParticipantAdd(participantName)}
+        >
           <Text style={styles.buttonText}>+</Text>
         </TouchableOpacity>
       </View>
@@ -46,7 +79,7 @@ export function Home() {
           <Participant
             key={item}
             name={item}
-            onRemove={() => handleParticipantRemove()}
+            onRemove={() => handleParticipantRemove(item)}
           />
         )}
         showsVerticalScrollIndicator={false}
